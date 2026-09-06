@@ -1,13 +1,9 @@
 # Streaming Schedule
 
 A permanent home for your streaming schedule — past, current, and future — with a live Twitch
-player, built as a minimal, technical "developer streaming log" rather than a generic SaaS
-dashboard.
+player, a searchable database-backed archive, and a full admin area to manage your streams.
 
-## What's included (MVP)
-
-This is Phase 1–3 of the full product vision: the public homepage timeline, individual stream
-pages, live Twitch detection, and an admin area to manage streams.
+## Features
 
 - **Public homepage** — live/offline state, next stream with countdown, upcoming streams,
   recent streams
@@ -16,18 +12,14 @@ pages, live Twitch detection, and an admin area to manage streams.
   Twitch client secret never reaches the browser
 - **Admin area** (`/admin`) — sign in, dashboard stats, full stream CRUD (create, edit, delete,
   duplicate, reschedule, cancel)
+- **REST API** — filterable/paginated stream listing plus series, projects, and live-status
+  endpoints under `/api/`
 - **Database-backed archive** — Postgres via Prisma is the source of truth for everything
   except "are we live right now," which Twitch answers
 - **Timezone-correct scheduling** — every time is stored in UTC and rendered in the stream's
   configured timezone, handling daylight saving correctly
 - **Unit tests** for the parts that are easy to get subtly wrong: stream ordering, next-stream
   selection, live-state resolution, and timezone conversion
-
-**Not included yet** (deferred per the phased build-out — see `Roadmap` below): the full
-`/streams`, `/series`, `/projects`, `/stats` browsing pages, recurring-schedule generation,
-tags/resources admin UI, and notifications. The database schema already supports series,
-projects, and tags — you can assign them to a stream from the admin form — there just isn't a
-dedicated browsing page for them yet.
 
 ## Architecture
 
@@ -158,15 +150,3 @@ combines both: Twitch says *whether* you're live right now; if there's a schedul
 time window contains the current moment, its title/description/series/tags are shown alongside
 the live player. If you go live without a matching scheduled stream, the player still shows with
 Twitch's own title and category.
-
-## Roadmap (not yet built)
-
-- `/streams`, `/series/[slug]`, `/projects/[slug]` full archive/browsing pages with search,
-  filtering, and pagination
-- Admin UI for series, projects, tags, and resources (currently: create via `POST /api/series`
-  and `POST /api/projects`, or directly in the database — the Stream form already lets you
-  *assign* existing series/projects)
-- Recurring schedule generation (`RecurringSchedule` model exists in the schema; the job that
-  turns it into individual `Stream` rows isn't built yet)
-- `/stats` page (streaming hours per month, per series, per category)
-- `.ics` calendar export, Discord notifications
