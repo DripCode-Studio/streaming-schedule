@@ -1,10 +1,20 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { Suspense, useState, type FormEvent } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function AdminLoginPage() {
+  return (
+    <div className="mx-auto flex min-h-[70vh] max-w-sm flex-col justify-center px-6">
+      <Suspense>
+        <LoginForm />
+      </Suspense>
+    </div>
+  );
+}
+
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
@@ -34,7 +44,7 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="mx-auto flex min-h-[70vh] max-w-sm flex-col justify-center px-6">
+    <>
       <h1 className="mb-6 text-lg font-medium text-ink">Admin sign in</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <label className="flex flex-col gap-1">
@@ -68,6 +78,6 @@ export default function AdminLoginPage() {
           {submitting ? 'Signing in…' : 'Sign in'}
         </button>
       </form>
-    </div>
+    </>
   );
 }
