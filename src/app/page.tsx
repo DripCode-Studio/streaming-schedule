@@ -38,7 +38,7 @@ export default async function HomePage() {
     .filter((s) => s.id !== nextStreamCard?.id)
     .slice(0, UPCOMING_COUNT);
 
-  const empty = past.length === 0 && upcoming.length === 0 && !isLive;
+  const empty = past.length === 0 && upcoming.length === 0 && !isLive && !nextStreamCard;
 
   return (
     <div className="mx-auto max-w-content px-6 py-12">
