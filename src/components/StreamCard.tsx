@@ -1,9 +1,7 @@
-import Link from 'next/link';
 import { formatInZone, relativeLabel } from '@/lib/time';
 import { StatusBadge } from './StatusBadge';
 
 interface StreamCardProps {
-  slug: string;
   title: string;
   description?: string | null;
   startTime: Date;
@@ -17,7 +15,6 @@ interface StreamCardProps {
 }
 
 export function StreamCard({
-  slug,
   title,
   description,
   startTime,
@@ -30,13 +27,13 @@ export function StreamCard({
   const isCancelled = status === 'CANCELLED';
 
   const styles = dim
-    ? 'border-border bg-transparent opacity-60 hover:border-border'
+    ? 'border-border bg-transparent opacity-60'
     : emphasized
       ? 'border-border-strong bg-panel hover:border-accent'
-      : ['border-border hover:border-border-strong', isCancelled ? 'opacity-70' : ''].join(' ');
+      : ['border-border', isCancelled ? 'opacity-70' : ''].join(' ');
 
   return (
-    <Link href={`/streams/${slug}`} className={`block rounded border px-6 py-5 transition-colors ${styles}`}>
+    <div className={`block rounded border px-6 py-5 transition-colors ${styles}`}>
       <div className="flex items-center justify-between gap-4">
         <h3 className={`font-medium ${emphasized && !dim ? 'text-lg' : 'text-base'} ${dim ? 'text-faint' : 'text-ink'}`}>
           {title}
@@ -51,6 +48,6 @@ export function StreamCard({
       {description && (
         <p className={`mt-3 max-w-content text-sm ${dim ? 'text-faint' : 'text-muted'}`}>{description}</p>
       )}
-    </Link>
+    </div>
   );
 }

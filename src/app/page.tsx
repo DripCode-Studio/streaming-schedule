@@ -60,7 +60,6 @@ export default async function HomePage() {
           {past.map((s) => (
             <StreamCard
               key={s.id}
-              slug={s.slug}
               title={s.title}
               description={s.description}
               startTime={s.startTime}
@@ -114,7 +113,6 @@ export default async function HomePage() {
           {upcoming.map((s) => (
             <StreamCard
               key={s.id}
-              slug={s.slug}
               title={s.title}
               description={s.description}
               startTime={s.startTime}
