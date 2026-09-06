@@ -9,6 +9,10 @@ interface StreamCardProps {
   startTime: Date;
   timezone: string;
   status: 'DRAFT' | 'SCHEDULED' | 'LIVE' | 'COMPLETED' | 'CANCELLED';
+  /** Overrides the auto "starts in / finished" text. */
+  label?: string;
+  /** Grayed-out, "disabled" look for past streams. */
+  dim?: boolean;
   emphasized?: boolean;
 }
 
@@ -19,32 +23,34 @@ export function StreamCard({
   startTime,
   timezone,
   status,
+  label,
+  dim = false,
   emphasized = false,
 }: StreamCardProps) {
-  const isPast = status === 'COMPLETED';
   const isCancelled = status === 'CANCELLED';
 
+  const styles = dim
+    ? 'border-border bg-transparent opacity-60 hover:border-border'
+    : emphasized
+      ? 'border-border-strong bg-panel hover:border-accent'
+      : ['border-border hover:border-border-strong', isCancelled ? 'opacity-70' : ''].join(' ');
+
   return (
-    <Link
-      href={`/streams/${slug}`}
-      className={[
-        'block rounded border px-6 py-5 transition-colors',
-        emphasized
-          ? 'border-border-strong bg-panel hover:border-accent'
-          : 'border-border hover:border-border-strong',
-        isPast || isCancelled ? 'opacity-70' : '',
-      ].join(' ')}
-    >
+    <Link href={`/streams/${slug}`} className={`block rounded border px-6 py-5 transition-colors ${styles}`}>
       <div className="flex items-center justify-between gap-4">
-        <h3 className={`font-medium ${emphasized ? 'text-lg' : 'text-base'} text-ink`}>{title}</h3>
-        <StatusBadge status={status} />
+        <h3 className={`font-medium ${emphasized && !dim ? 'text-lg' : 'text-base'} ${dim ? 'text-faint' : 'text-ink'}`}>
+          {title}
+        </h3>
+        {!dim && <StatusBadge status={status} />}
       </div>
 
-      <p className="mt-1 font-mono text-xs text-muted">
-        {relativeLabel(startTime)} · {formatInZone(startTime, timezone, 'EEE, MMM d · HH:mm')}
+      <p className={`mt-1 font-mono text-xs ${dim ? 'text-faint' : 'text-muted'}`}>
+        {(label ?? relativeLabel(startTime))} · {formatInZone(startTime, timezone, 'EEE, MMM d · HH:mm')}
       </p>
 
-      {description && <p className="mt-3 max-w-content text-sm text-muted">{description}</p>}
+      {description && (
+        <p className={`mt-3 max-w-content text-sm ${dim ? 'text-faint' : 'text-muted'}`}>{description}</p>
+      )}
     </Link>
   );
 }

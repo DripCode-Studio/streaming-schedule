@@ -1,14 +1,17 @@
 import { db } from '@/lib/db';
 import { twitchService } from '@/lib/twitch/service';
-import { resolveHomepageState, sortUpcoming, sortPast } from '@/lib/streams';
+import { resolveHomepageState, sortPast, sortUpcoming } from '@/lib/streams';
 import { siteConfig, twitchChannelUrl } from '@/lib/config';
 import { TwitchPlayer } from '@/components/TwitchPlayer';
 import { StreamCard } from '@/components/StreamCard';
-import { Countdown } from '@/components/Countdown';
 import { EmptyState } from '@/components/EmptyState';
-import { elapsedLabel, formatInZone } from '@/lib/time';
+import { Countdown } from '@/components/Countdown';
+import { elapsedLabel, formatInZone, relativeLabel } from '@/lib/time';
 
 export const revalidate = 30; // keep live state reasonably fresh without hitting Twitch on every request
+
+const PAST_COUNT = 3;
+const UPCOMING_COUNT = 10;
 
 export default async function HomePage() {
   const now = new Date();
@@ -23,12 +26,23 @@ export default async function HomePage() {
   const twitchStatus = await twitchService.getLiveStatus();
   const state = resolveHomepageState(streams, twitchStatus, now);
 
-  const upcoming = sortUpcoming(streams, now);
-  const past = sortPast(streams, now);
+  const isLive = state.kind === 'live';
+  const currentStream = isLive ? (state.kind === 'live' ? state.stream : null) : null;
+  const nextStreamCard = !isLive && state.kind === 'offline' ? state.nextStream : null;
+
+  const past = sortPast(streams, now)
+    .filter((s) => s.id !== currentStream?.id)
+    .slice(0, PAST_COUNT);
+
+  const upcoming = sortUpcoming(streams, now)
+    .filter((s) => s.id !== nextStreamCard?.id)
+    .slice(0, UPCOMING_COUNT);
+
+  const empty = past.length === 0 && upcoming.length === 0 && !isLive;
 
   return (
-    <div className="mx-auto max-w-content px-6 py-16">
-      <header className="mb-16">
+    <div className="mx-auto max-w-content px-6 py-12">
+      <header className="mb-10">
         <h1 className="text-3xl font-semibold tracking-tight text-ink">Schedule</h1>
         <p className="mt-2 text-sm text-muted">
           for{' '}
@@ -39,111 +53,78 @@ export default async function HomePage() {
         </p>
       </header>
 
-      {state.kind === 'live' ? (
-        <section className="mb-16" aria-labelledby="live-heading">
-          <h2 id="live-heading" className="mb-4 font-mono text-xs uppercase tracking-wide text-accent">
-            <span className="mr-2 inline-block h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
-            Live now
-          </h2>
-
-          <TwitchPlayer channel={siteConfig.twitchUsername} />
-
-          <div className="mt-5">
-            <h3 className="text-lg font-medium text-ink">
-              {state.stream?.title ?? state.twitch.title}
-            </h3>
-            {state.stream?.series && (
-              <p className="mt-1 text-sm text-muted">{state.stream.series.name}</p>
-            )}
-            <p className="mt-3 font-mono text-xs text-muted">
-              {state.stream?.category ?? state.twitch.category} · started{' '}
-              {elapsedLabel(new Date(state.twitch.startedAt))} ago
-            </p>
-            <a
-              href={twitchChannelUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-4 inline-block font-mono text-sm text-accent hover:underline"
-            >
-              Watch on Twitch →
-            </a>
-          </div>
-        </section>
+      {empty ? (
+        <EmptyState>No streams recorded yet.</EmptyState>
       ) : (
-        <section className="mb-16" aria-labelledby="offline-heading">
-          <h2 id="offline-heading" className="mb-4 font-mono text-xs uppercase tracking-wide text-faint">
-            Currently offline
-          </h2>
+        <div className="flex flex-col gap-3">
+          {past.map((s) => (
+            <StreamCard
+              key={s.id}
+              slug={s.slug}
+              title={s.title}
+              description={s.description}
+              startTime={s.startTime}
+              timezone={s.timezone}
+              status={s.status}
+              dim
+              label={`Streamed ${relativeLabel(s.startTime, now).replace(/^finished /, '')}`}
+            />
+          ))}
 
-          {state.nextStream ? (
-            <div className="rounded border border-border-strong bg-panel px-6 py-6">
-              <p className="font-mono text-xs uppercase tracking-wide text-accent">Next stream</p>
-              <h3 className="mt-2 text-xl font-medium text-ink">{state.nextStream.title}</h3>
-              <p className="mt-2 text-sm text-muted">
-                {formatInZone(state.nextStream.startTime, state.nextStream.timezone, 'EEEE, MMMM d')}
-                {' · '}
-                {formatInZone(state.nextStream.startTime, state.nextStream.timezone, 'HH:mm')}
-                {state.nextStream.endTime &&
-                  ` — ${formatInZone(state.nextStream.endTime, state.nextStream.timezone, 'HH:mm')}`}
-              </p>
-              {state.nextStream.description && (
-                <p className="mt-3 max-w-content text-sm text-muted">{state.nextStream.description}</p>
-              )}
-              <div className="mt-4">
-                <Countdown target={state.nextStream.startTime.toISOString()} />
+          {isLive && state.kind === 'live' ? (
+            <section className="rounded border border-border-strong bg-panel px-4 py-4">
+              <TwitchPlayer channel={siteConfig.twitchUsername} />
+              <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 px-2 pb-1">
+                <span className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-wide text-accent">
+                  <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-accent" aria-hidden />
+                  Currently streaming
+                </span>
+                <p className="text-sm font-medium text-ink">{state.stream?.title ?? state.twitch.title}</p>
+                <p className="font-mono text-xs text-muted">
+                  started {elapsedLabel(new Date(state.twitch.startedAt), now)} ago
+                </p>
+                <a
+                  href={twitchChannelUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-mono text-xs text-accent hover:underline"
+                >
+                  Watch on Twitch →
+                </a>
               </div>
-            </div>
-          ) : (
-            <EmptyState>No upcoming streams scheduled yet.</EmptyState>
-          )}
-        </section>
+            </section>
+          ) : nextStreamCard ? (
+            <section className="rounded border border-border-strong bg-panel px-6 py-5">
+              <p className="font-mono text-xs uppercase tracking-wide text-accent">Next stream</p>
+              <h3 className="mt-1 text-lg font-medium text-ink">{nextStreamCard.title}</h3>
+              <p className="mt-1 text-sm text-muted">
+                Will start in{' '}
+                {relativeLabel(nextStreamCard.startTime, now).replace(/^starts in /, '')} ·{' '}
+                {formatInZone(nextStreamCard.startTime, nextStreamCard.timezone, 'EEEE, MMM d · HH:mm')}
+              </p>
+              {nextStreamCard.description && (
+                <p className="mt-3 max-w-content text-sm text-muted">{nextStreamCard.description}</p>
+              )}
+              <div className="mt-3">
+                <Countdown target={nextStreamCard.startTime.toISOString()} />
+              </div>
+            </section>
+          ) : null}
+
+          {upcoming.map((s) => (
+            <StreamCard
+              key={s.id}
+              slug={s.slug}
+              title={s.title}
+              description={s.description}
+              startTime={s.startTime}
+              timezone={s.timezone}
+              status={s.status}
+              label={`Will start in ${relativeLabel(s.startTime, now).replace(/^starts in /, '')}`}
+            />
+          ))}
+        </div>
       )}
-
-      <section className="mb-16" aria-labelledby="upcoming-heading">
-        <h2 id="upcoming-heading" className="mb-4 font-mono text-xs uppercase tracking-wide text-faint">
-          Upcoming
-        </h2>
-        {upcoming.length > 1 ? (
-          <div className="flex flex-col gap-3">
-            {upcoming.slice(1, 6).map((s) => (
-              <StreamCard
-                key={s.id}
-                slug={s.slug}
-                title={s.title}
-                description={s.description}
-                startTime={s.startTime}
-                timezone={s.timezone}
-                status={s.status}
-              />
-            ))}
-          </div>
-        ) : (
-          <EmptyState>Nothing else on the schedule yet.</EmptyState>
-        )}
-      </section>
-
-      <section aria-labelledby="recent-heading">
-        <h2 id="recent-heading" className="mb-4 font-mono text-xs uppercase tracking-wide text-faint">
-          Recent streams
-        </h2>
-        {past.length > 0 ? (
-          <div className="flex flex-col gap-3">
-            {past.slice(0, 6).map((s) => (
-              <StreamCard
-                key={s.id}
-                slug={s.slug}
-                title={s.title}
-                description={s.description}
-                startTime={s.startTime}
-                timezone={s.timezone}
-                status={s.status}
-              />
-            ))}
-          </div>
-        ) : (
-          <EmptyState>No streams recorded yet.</EmptyState>
-        )}
-      </section>
     </div>
   );
 }
