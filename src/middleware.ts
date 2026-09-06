@@ -7,6 +7,6 @@ export default withAuth({
 });
 
 export const config = {
-  // Protect every /admin page except the login page itself.
-  matcher: ['/admin/((?!login).*)'],
+  // Protect /admin and every /admin sub-page except the login page itself.
+  matcher: ['/admin(/(?!login).*)?'],
 };

@@ -1,7 +1,15 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { SignOutButton } from './sign-out-button';
 
-export default function ProtectedAdminLayout({ children }: { children: React.ReactNode }) {
+export const dynamic = 'force-dynamic';
+
+export default async function ProtectedAdminLayout({ children }: { children: React.ReactNode }) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) redirect('/admin/login');
+
   return (
     <div className="mx-auto max-w-content px-6 py-10">
       <div className="mb-8 flex items-center justify-between border-b border-border pb-4">
