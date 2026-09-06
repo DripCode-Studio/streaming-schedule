@@ -1,0 +1,157 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum StreamStatus {
+  DRAFT
+  SCHEDULED
+  LIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum StreamType {
+  CODING
+  LEARNING
+  DEBUGGING
+  PROJECT
+  GAMING
+  JUST_CHAT
+  COMMUNITY
+  SPECIAL_EVENT
+}
+
+enum SeriesStatus {
+  PLANNED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum ProjectStatus {
+  IDEA
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ARCHIVED
+}
+
+model Stream {
+  id          String       @id @default(cuid())
+  title       String
+  slug        String       @unique
+  description String?
+
+  status StreamStatus @default(SCHEDULED)
+  type   StreamType   @default(CODING)
+
+  startTime DateTime
+  endTime   DateTime?
+  timezone  String    @default("America/Toronto")
+
+  category     String?
+  thumbnailUrl String?
+
+  twitchUrl    String?
+  twitchVodUrl String?
+  youtubeUrl   String?
+
+  episodeNumber Int?
+
+  githubRepository String?
+  githubPullRequest String?
+  githubCommit      String?
+
+  notes String?
+
+  seriesId String?
+  series   Series? @relation(fields: [seriesId], references: [id], onDelete: SetNull)
+
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  tags Tag[] @relation("StreamTags")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([startTime])
+  @@index([seriesId])
+  @@index([projectId])
+}
+
+model Series {
+  id          String       @id @default(cuid())
+  name        String
+  slug        String       @unique
+  description String?
+  coverUrl    String?
+  status      SeriesStatus @default(ACTIVE)
+  startDate   DateTime?
+  endDate     DateTime?
+
+  streams            Stream[]
+  recurringSchedules RecurringSchedule[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Project {
+  id            String        @id @default(cuid())
+  name          String
+  slug          String        @unique
+  description   String?
+  status        ProjectStatus @default(ACTIVE)
+  repositoryUrl String?
+  websiteUrl    String?
+  thumbnailUrl  String?
+
+  streams            Stream[]
+  recurringSchedules RecurringSchedule[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Tag {
+  id   String @id @default(cuid())
+  name String @unique
+  slug String @unique
+
+  streams Stream[] @relation("StreamTags")
+}
+
+model RecurringSchedule {
+  id        String  @id @default(cuid())
+  title     String
+  dayOfWeek Int // 0 = Sunday ... 6 = Saturday
+  startTime String // "06:00"
+  endTime   String // "10:00"
+  timezone  String  @default("America/Toronto")
+  enabled   Boolean @default(true)
+
+  seriesId String?
+  series   Series? @relation(fields: [seriesId], references: [id], onDelete: SetNull)
+
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime @default(now())
+}

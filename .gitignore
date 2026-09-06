@@ -1,0 +1,12 @@
+node_modules
+.next
+.env
+.env.local
+.env*.local
+*.tsbuildinfo
+dist
+.DS_Store
+
+# npm (we use pnpm — keep pnpm-lock.yaml tracked, ignore npm artifacts)
+package-lock.json
+npm-debug.log*
