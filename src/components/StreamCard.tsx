@@ -6,6 +6,7 @@ interface StreamCardProps {
   title: string;
   description?: string | null;
   startTime: Date;
+  timezone: string;
   status: 'DRAFT' | 'SCHEDULED' | 'LIVE' | 'COMPLETED' | 'CANCELLED';
   /** Overrides the auto "starts in / finished" text. */
   label?: string;
@@ -18,6 +19,7 @@ export function StreamCard({
   title,
   description,
   startTime,
+  timezone,
   status,
   label,
   dim = false,
@@ -41,7 +43,14 @@ export function StreamCard({
       </div>
 
       <p className={`mt-1 font-mono text-xs ${dim ? 'text-faint' : 'text-muted'}`}>
-        {(label ?? relativeLabel(startTime))} · {formatInZone(startTime, siteConfig.displayTimezone, 'EEE, MMM d · HH:mm')}
+        {(label ?? relativeLabel(startTime))} ·{' '}
+        {formatInZone(startTime, timezone, 'EEE, MMM d · HH:mm z')}
+        {siteConfig.secondaryTimezone && siteConfig.secondaryTimezone !== timezone && (
+          <>
+            {' '}
+            · {formatInZone(startTime, siteConfig.secondaryTimezone, 'HH:mm z')}
+          </>
+        )}
       </p>
 
       {description && (

@@ -7,8 +7,8 @@ export const siteConfig = {
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
   githubUrl: process.env.GITHUB_URL || '',
   youtubeUrl: process.env.YOUTUBE_URL || '',
-  // Streamers enter times in their own timezone; times are shown to visitors in this timezone.
-  displayTimezone: process.env.DISPLAY_TIMEZONE || 'Europe/Paris',
+  // Optional second timezone shown alongside the streamer's home timezone (e.g. for an international audience).
+  secondaryTimezone: process.env.SECONDARY_TIMEZONE || 'Europe/Paris',
 } as const;
 
 export const twitchChannelUrl = `https://twitch.tv/${siteConfig.twitchUsername}`;

@@ -40,7 +40,13 @@ export default async function AdminStreamsPage() {
                   <StatusBadge status={s.status} />
                 </div>
                 <p className="mt-1 font-mono text-xs text-muted">
-                  {formatInZone(s.startTime, siteConfig.displayTimezone, 'EEE, MMM d, yyyy · HH:mm')}
+                  {formatInZone(s.startTime, s.timezone, 'EEE, MMM d, yyyy · HH:mm z')}
+                  {siteConfig.secondaryTimezone && siteConfig.secondaryTimezone !== s.timezone && (
+                    <>
+                      {' '}
+                      · {formatInZone(s.startTime, siteConfig.secondaryTimezone, 'HH:mm z')}
+                    </>
+                  )}
                 </p>
               </div>
               <StreamRowActions streamId={s.id} />
