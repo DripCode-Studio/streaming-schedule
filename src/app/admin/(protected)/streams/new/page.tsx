@@ -6,11 +6,6 @@ interface Props {
 }
 
 export default async function NewStreamPage({ searchParams }: Props) {
-  const [series, projects] = await Promise.all([
-    db.series.findMany({ orderBy: { name: 'asc' } }),
-    db.project.findMany({ orderBy: { name: 'asc' } }),
-  ]);
-
   let initialValues: Partial<StreamFormValues> | undefined;
 
   if (searchParams.duplicateFrom) {
@@ -26,13 +21,6 @@ export default async function NewStreamPage({ searchParams }: Props) {
         endTimeLocal: '',
         timezone: source.timezone,
         category: source.category ?? '',
-        twitchVodUrl: '',
-        youtubeUrl: '',
-        seriesId: source.seriesId ?? '',
-        projectId: source.projectId ?? '',
-        episodeNumber: source.episodeNumber ? String(source.episodeNumber) : '',
-        githubRepository: source.githubRepository ?? '',
-        notes: source.notes ?? '',
       };
     }
   }
@@ -47,12 +35,7 @@ export default async function NewStreamPage({ searchParams }: Props) {
           Copied from the original — pick a new date and time below before saving.
         </p>
       )}
-      <StreamForm
-        mode="create"
-        initialValues={initialValues}
-        seriesOptions={series}
-        projectOptions={projects}
-      />
+      <StreamForm mode="create" initialValues={initialValues} />
     </div>
   );
 }

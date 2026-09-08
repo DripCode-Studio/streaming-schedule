@@ -14,13 +14,6 @@ export interface StreamFormValues {
   endTimeLocal: string;
   timezone: string;
   category: string;
-  twitchVodUrl: string;
-  youtubeUrl: string;
-  seriesId: string;
-  projectId: string;
-  episodeNumber: string;
-  githubRepository: string;
-  notes: string;
 }
 
 const EMPTY: StreamFormValues = {
@@ -32,29 +25,15 @@ const EMPTY: StreamFormValues = {
   endTimeLocal: '',
   timezone: 'America/Toronto',
   category: '',
-  twitchVodUrl: '',
-  youtubeUrl: '',
-  seriesId: '',
-  projectId: '',
-  episodeNumber: '',
-  githubRepository: '',
-  notes: '',
 };
-
-interface Option {
-  id: string;
-  name: string;
-}
 
 interface Props {
   mode: 'create' | 'edit';
   streamId?: string;
   initialValues?: Partial<StreamFormValues>;
-  seriesOptions: Option[];
-  projectOptions: Option[];
 }
 
-export function StreamForm({ mode, streamId, initialValues, seriesOptions, projectOptions }: Props) {
+export function StreamForm({ mode, streamId, initialValues }: Props) {
   const router = useRouter();
   const [values, setValues] = useState<StreamFormValues>({ ...EMPTY, ...initialValues });
   const [submitting, setSubmitting] = useState(false);
@@ -86,13 +65,6 @@ export function StreamForm({ mode, streamId, initialValues, seriesOptions, proje
         : null,
       timezone: values.timezone,
       category: values.category || null,
-      twitchVodUrl: values.twitchVodUrl || null,
-      youtubeUrl: values.youtubeUrl || null,
-      seriesId: values.seriesId || null,
-      projectId: values.projectId || null,
-      episodeNumber: values.episodeNumber ? Number(values.episodeNumber) : null,
-      githubRepository: values.githubRepository || null,
-      notes: values.notes || null,
     };
 
     const res = await fetch(mode === 'create' ? '/api/streams' : `/api/streams/${streamId}`, {
@@ -197,73 +169,6 @@ export function StreamForm({ mode, streamId, initialValues, seriesOptions, proje
           onChange={(e) => set('category', e.target.value)}
           className={inputClass}
           placeholder="Java, Spring Boot, PostgreSQL"
-        />
-      </Field>
-
-      <div className="grid grid-cols-2 gap-4">
-        <Field label="Series">
-          <select value={values.seriesId} onChange={(e) => set('seriesId', e.target.value)} className={inputClass}>
-            <option value="">None</option>
-            {seriesOptions.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field label="Project">
-          <select value={values.projectId} onChange={(e) => set('projectId', e.target.value)} className={inputClass}>
-            <option value="">None</option>
-            {projectOptions.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-        </Field>
-      </div>
-
-      <Field label="Episode number">
-        <input
-          type="number"
-          min={1}
-          value={values.episodeNumber}
-          onChange={(e) => set('episodeNumber', e.target.value)}
-          className={inputClass}
-        />
-      </Field>
-
-      <div className="grid grid-cols-2 gap-4">
-        <Field label="Twitch VOD URL">
-          <input
-            value={values.twitchVodUrl}
-            onChange={(e) => set('twitchVodUrl', e.target.value)}
-            className={inputClass}
-          />
-        </Field>
-        <Field label="YouTube URL">
-          <input
-            value={values.youtubeUrl}
-            onChange={(e) => set('youtubeUrl', e.target.value)}
-            className={inputClass}
-          />
-        </Field>
-      </div>
-
-      <Field label="GitHub repository">
-        <input
-          value={values.githubRepository}
-          onChange={(e) => set('githubRepository', e.target.value)}
-          className={inputClass}
-        />
-      </Field>
-
-      <Field label="Notes" hint="Private, admin-only notes">
-        <textarea
-          value={values.notes}
-          onChange={(e) => set('notes', e.target.value)}
-          rows={3}
-          className={inputClass}
         />
       </Field>
 

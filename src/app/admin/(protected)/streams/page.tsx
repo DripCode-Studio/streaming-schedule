@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { db } from '@/lib/db';
 import { formatInZone } from '@/lib/time';
+import { siteConfig } from '@/lib/config';
 import { StatusBadge } from '@/components/StatusBadge';
 import { StreamRowActions } from './stream-row-actions';
 
@@ -39,7 +40,7 @@ export default async function AdminStreamsPage() {
                   <StatusBadge status={s.status} />
                 </div>
                 <p className="mt-1 font-mono text-xs text-muted">
-                  {formatInZone(s.startTime, s.timezone, 'EEE, MMM d, yyyy · HH:mm')}
+                  {formatInZone(s.startTime, siteConfig.displayTimezone, 'EEE, MMM d, yyyy · HH:mm')}
                 </p>
               </div>
               <StreamRowActions streamId={s.id} />
