@@ -63,7 +63,6 @@ export default async function HomePage() {
               title={s.title}
               description={s.description}
               startTime={s.startTime}
-              timezone={s.timezone}
               status={s.status}
               dim
               label={`Streamed ${relativeLabel(s.startTime, now).replace(/^finished /, '')}`}
@@ -99,7 +98,7 @@ export default async function HomePage() {
               <p className="mt-1 text-sm text-muted">
                 Will start in{' '}
                 {relativeLabel(nextStreamCard.startTime, now).replace(/^starts in /, '')} ·{' '}
-                {formatInZone(nextStreamCard.startTime, nextStreamCard.timezone, 'EEEE, MMM d · HH:mm')}
+                {formatInZone(nextStreamCard.startTime, siteConfig.displayTimezone, 'EEEE, MMM d · HH:mm')}
               </p>
               {nextStreamCard.description && (
                 <p className="mt-3 max-w-content text-sm text-muted">{nextStreamCard.description}</p>
@@ -116,7 +115,6 @@ export default async function HomePage() {
               title={s.title}
               description={s.description}
               startTime={s.startTime}
-              timezone={s.timezone}
               status={s.status}
               label={`Will start in ${relativeLabel(s.startTime, now).replace(/^starts in /, '')}`}
             />
