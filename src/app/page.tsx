@@ -99,7 +99,14 @@ export default async function HomePage() {
               <p className="mt-1 text-sm text-muted">
                 Will start in{' '}
                 {relativeLabel(nextStreamCard.startTime, now).replace(/^starts in /, '')} ·{' '}
-                {formatInZone(nextStreamCard.startTime, nextStreamCard.timezone, 'EEEE, MMM d · HH:mm')}
+                {formatInZone(nextStreamCard.startTime, nextStreamCard.timezone, 'EEEE, MMM d · HH:mm z')}
+                {siteConfig.secondaryTimezone &&
+                  siteConfig.secondaryTimezone !== nextStreamCard.timezone && (
+                    <>
+                      {' '}
+                      · {formatInZone(nextStreamCard.startTime, siteConfig.secondaryTimezone, 'HH:mm z')}
+                    </>
+                  )}
               </p>
               {nextStreamCard.description && (
                 <p className="mt-3 max-w-content text-sm text-muted">{nextStreamCard.description}</p>

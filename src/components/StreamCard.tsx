@@ -1,5 +1,6 @@
 import { formatInZone, relativeLabel } from '@/lib/time';
 import { StatusBadge } from './StatusBadge';
+import { siteConfig } from '@/lib/config';
 
 interface StreamCardProps {
   title: string;
@@ -42,7 +43,14 @@ export function StreamCard({
       </div>
 
       <p className={`mt-1 font-mono text-xs ${dim ? 'text-faint' : 'text-muted'}`}>
-        {(label ?? relativeLabel(startTime))} · {formatInZone(startTime, timezone, 'EEE, MMM d · HH:mm')}
+        {(label ?? relativeLabel(startTime))} ·{' '}
+        {formatInZone(startTime, timezone, 'EEE, MMM d · HH:mm z')}
+        {siteConfig.secondaryTimezone && siteConfig.secondaryTimezone !== timezone && (
+          <>
+            {' '}
+            · {formatInZone(startTime, siteConfig.secondaryTimezone, 'HH:mm z')}
+          </>
+        )}
       </p>
 
       {description && (

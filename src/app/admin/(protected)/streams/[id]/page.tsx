@@ -8,11 +8,7 @@ interface Props {
 }
 
 export default async function EditStreamPage({ params }: Props) {
-  const [stream, series, projects] = await Promise.all([
-    db.stream.findUnique({ where: { id: params.id } }),
-    db.series.findMany({ orderBy: { name: 'asc' } }),
-    db.project.findMany({ orderBy: { name: 'asc' } }),
-  ]);
+  const stream = await db.stream.findUnique({ where: { id: params.id } });
 
   if (!stream) notFound();
 
@@ -22,8 +18,6 @@ export default async function EditStreamPage({ params }: Props) {
       <StreamForm
         mode="edit"
         streamId={stream.id}
-        seriesOptions={series}
-        projectOptions={projects}
         initialValues={{
           title: stream.title,
           description: stream.description ?? '',
@@ -33,13 +27,6 @@ export default async function EditStreamPage({ params }: Props) {
           endTimeLocal: stream.endTime ? utcToLocalInput(stream.endTime, stream.timezone) : '',
           timezone: stream.timezone,
           category: stream.category ?? '',
-          twitchVodUrl: stream.twitchVodUrl ?? '',
-          youtubeUrl: stream.youtubeUrl ?? '',
-          seriesId: stream.seriesId ?? '',
-          projectId: stream.projectId ?? '',
-          episodeNumber: stream.episodeNumber ? String(stream.episodeNumber) : '',
-          githubRepository: stream.githubRepository ?? '',
-          notes: stream.notes ?? '',
         }}
       />
     </div>

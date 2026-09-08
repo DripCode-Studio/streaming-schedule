@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { twitchService } from '@/lib/twitch/service';
 import { pickNextStream } from '@/lib/streams';
 import { formatInZone } from '@/lib/time';
+import { siteConfig } from '@/lib/config';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,7 +55,14 @@ export default async function AdminDashboardPage() {
           >
             <p className="text-sm font-medium text-ink">{nextStream.title}</p>
             <p className="mt-1 font-mono text-xs text-muted">
-              {formatInZone(nextStream.startTime, nextStream.timezone, 'EEE, MMM d · HH:mm')}
+              {formatInZone(nextStream.startTime, nextStream.timezone, 'EEE, MMM d · HH:mm z')}
+                {siteConfig.secondaryTimezone &&
+                  siteConfig.secondaryTimezone !== nextStream.timezone && (
+                    <>
+                      {' '}
+                      · {formatInZone(nextStream.startTime, siteConfig.secondaryTimezone, 'HH:mm z')}
+                    </>
+                  )}
             </p>
           </Link>
         ) : (
