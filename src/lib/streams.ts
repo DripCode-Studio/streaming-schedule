@@ -70,6 +70,25 @@ export function resolveHomepageState<T extends StreamLike>(
     };
   }
 
+  // Fallback: if the DB has a stream with LIVE status whose time window is
+  // still open, show the overlay even when the Twitch API failed or returned
+  // offline (e.g. credentials issue, rate-limit, network error).
+  const liveStream = pickInProgressStream(streams, now);
+  if (liveStream?.status === 'LIVE') {
+    return {
+      kind: 'live',
+      stream: liveStream,
+      twitch: {
+        isLive: true,
+        title: liveStream.title,
+        category: '',
+        viewerCount: 0,
+        startedAt: liveStream.startTime.toISOString(),
+        thumbnailUrl: '',
+      },
+    };
+  }
+
   return {
     kind: 'offline',
     nextStream: pickNextStream(streams, now),
