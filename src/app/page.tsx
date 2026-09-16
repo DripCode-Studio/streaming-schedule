@@ -6,6 +6,7 @@ import { TwitchPlayer } from '@/components/TwitchPlayer';
 import { StreamCard } from '@/components/StreamCard';
 import { EmptyState } from '@/components/EmptyState';
 import { Countdown } from '@/components/Countdown';
+import { WeeklyCalendar } from '@/components/WeeklyCalendar';
 import { elapsedLabel, formatInZone, relativeLabel } from '@/lib/time';
 
 export const revalidate = 30; // keep live state reasonably fresh without hitting Twitch on every request
@@ -52,6 +53,10 @@ export default async function HomePage() {
           streams
         </p>
       </header>
+
+      <div className="mb-10">
+        <WeeklyCalendar streams={streams} now={now} />
+      </div>
 
       {empty ? (
         <EmptyState>No streams recorded yet.</EmptyState>
