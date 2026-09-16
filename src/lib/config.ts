@@ -7,6 +7,8 @@ export const siteConfig = {
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
   githubUrl: process.env.GITHUB_URL || '',
   youtubeUrl: process.env.YOUTUBE_URL || '',
+  // The streamer's home timezone — used to anchor the weekly calendar.
+  streamerTimezone: process.env.STREAMER_TIMEZONE || 'America/Toronto',
   // Optional second timezone shown alongside the streamer's home timezone (e.g. for an international audience).
   secondaryTimezone: process.env.SECONDARY_TIMEZONE || 'Europe/Paris',
 } as const;
