@@ -33,7 +33,8 @@ export default async function HomePage() {
 
   const past = sortPast(streams, now)
     .filter((s) => s.id !== currentStream?.id)
-    .slice(0, PAST_COUNT);
+    .slice(0, PAST_COUNT)
+    .reverse();
 
   const upcoming = sortUpcoming(streams, now)
     .filter((s) => s.id !== nextStreamCard?.id)
