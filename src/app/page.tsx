@@ -11,7 +11,6 @@ import { elapsedLabel, formatInZone, relativeLabel } from '@/lib/time';
 
 export const revalidate = 30; // keep live state reasonably fresh without hitting Twitch on every request
 
-const PAST_COUNT = 3;
 const UPCOMING_COUNT = 10;
 
 export default async function HomePage() {
@@ -31,10 +30,8 @@ export default async function HomePage() {
   const currentStream = isLive ? (state.kind === 'live' ? state.stream : null) : null;
   const nextStreamCard = !isLive && state.kind === 'offline' ? state.nextStream : null;
 
-  const past = sortPast(streams, now)
-    .filter((s) => s.id !== currentStream?.id)
-    .slice(0, PAST_COUNT)
-    .reverse();
+  // Newest first so the scrollable panel opens on the most recent streams.
+  const past = sortPast(streams, now).filter((s) => s.id !== currentStream?.id);
 
   const upcoming = sortUpcoming(streams, now)
     .filter((s) => s.id !== nextStreamCard?.id)
@@ -63,18 +60,30 @@ export default async function HomePage() {
         <EmptyState>No streams recorded yet.</EmptyState>
       ) : (
         <div className="flex flex-col gap-3">
-          {past.map((s) => (
-            <StreamCard
-              key={s.id}
-              title={s.title}
-              description={s.description}
-              startTime={s.startTime}
-              timezone={s.timezone}
-              status={s.status}
-              dim
-              label={`Streamed ${relativeLabel(s.startTime, now).replace(/^finished /, '')}`}
-            />
-          ))}
+          {past.length > 0 && (
+            <section aria-labelledby="past-streams-heading">
+              <div className="mb-2 flex items-baseline justify-between gap-4 px-1">
+                <h2 id="past-streams-heading" className="font-mono text-xs uppercase tracking-wide text-muted">
+                  Past streams
+                </h2>
+                <p className="font-mono text-xs text-faint">{past.length} total · scroll for older</p>
+              </div>
+              <div className="past-scroll flex max-h-[24rem] flex-col gap-3 overflow-y-auto overscroll-contain rounded border border-border bg-panel/40 p-2">
+                {past.map((s) => (
+                  <StreamCard
+                    key={s.id}
+                    title={s.title}
+                    description={s.description}
+                    startTime={s.startTime}
+                    timezone={s.timezone}
+                    status={s.status}
+                    dim
+                    label={`Streamed ${relativeLabel(s.startTime, now).replace(/^finished /, '')}`}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
 
           {isLive && state.kind === 'live' ? (
             <section className="rounded border border-border-strong bg-panel px-4 py-4">
